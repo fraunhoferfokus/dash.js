@@ -81,7 +81,7 @@ function ThroughputRule(config) {
             if (currentBufferState.state === MetricsConstants.BUFFER_LOADED || isDynamic) {
                 switchRequest.quality = abrController.getQualityForBitrate(mediaInfo, throughput, streamId, latency);
                 scheduleController.setTimeToLoadDelay(0);
-                switchRequest.reason = {throughput: throughput, latency: latency};
+                switchRequest.reason = { throughput: throughput, latency: latency };
             }
         }
 

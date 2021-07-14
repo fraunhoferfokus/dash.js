@@ -517,7 +517,7 @@ import {HTTPRequest} from '../streaming/vo/metrics/HTTPRequest';
  *
  * Per default the last four segments (VoD) and the last three segments (Live) are used.
  *
- * If wide variations in throughput are detected, the number of segments can be dynamically increased to avoid oscillations.
+ * If wide variations in throughput are detected and increaseSampleAmountWhenOscillating is set to true, the number of segments can be dynamically increased to avoid oscillations.
  *
  * The exponentially weighted moving average (EWMA) method computes the average using exponential smoothing.
  *
@@ -846,7 +846,9 @@ function Settings() {
                     abandonRequestsRule: false
                 },
                 throughputHistory: {
+                    meanThroughputCalculationMode: Constants.ARITHMETIC_MEAN,
                     maxMeasurementsToKeep : 20,
+                    increaseSampleAmountWhenOscillating: true,
                     averageThroughputSampleAmount: {
                         live: 3,
                         vod: 4

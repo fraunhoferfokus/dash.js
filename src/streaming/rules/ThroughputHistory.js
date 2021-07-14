@@ -53,7 +53,10 @@ function ThroughputHistory(config) {
                 fast: settings.get().streaming.abr.throughputHistory.ewma.throughputFastHalfLifeSeconds,
                 slow: settings.get().streaming.abr.throughputHistory.ewma.throughputSlowHalfLifeSeconds
             },
-            latencyHalfLife: { fast: settings.get().streaming.abr.throughputHistory.ewma.latencyFastHalfLifeCount, slow: settings.get().streaming.abr.throughputHistory.ewma.latencySlowHalfLifeCount }
+            latencyHalfLife: {
+                fast: settings.get().streaming.abr.throughputHistory.ewma.latencyFastHalfLifeCount,
+                slow: settings.get().streaming.abr.throughputHistory.ewma.latencySlowHalfLifeCount
+            }
         };
 
         reset();
@@ -204,7 +207,7 @@ function ThroughputHistory(config) {
             sampleSize = 0;
         } else if (sampleSize >= arr.length) {
             sampleSize = arr.length;
-        } else if (isThroughput) {
+        } else if (isThroughput && settings.get().streaming.abr.throughputHistory.increaseSampleAmountWhenOscillating) {
             // if throughput samples vary a lot, average over a wider sample
             for (let i = 1; i < sampleSize; ++i) {
                 const ratio = arr[arr.length - i] / arr[arr.length - i - 1];
@@ -231,7 +234,7 @@ function ThroughputHistory(config) {
     function _getAverage(isThroughput, mediaType, isDynamic) {
         // only two moving average methods defined at the moment
         return settings.get().streaming.abr.movingAverageMethod !== Constants.MOVING_AVERAGE_SLIDING_WINDOW ?
-            getAverageEwma(isThroughput, mediaType) : getAverageSlidingWindow(isThroughput, mediaType, isDynamic);
+            getAverageEwma(isThroughput, mediaType) : _getAverageSlidingWindow(isThroughput, mediaType, isDynamic);
     }
 
     /**
@@ -241,7 +244,7 @@ function ThroughputHistory(config) {
      * @param {boolean} isDynamic
      * @return {number|NaN}
      */
-    function getAverageSlidingWindow(isThroughput, mediaType, isDynamic) {
+    function _getAverageSlidingWindow(isThroughput, mediaType, isDynamic) {
         const sampleSize = _getSampleSize(isThroughput, mediaType, isDynamic);
         const dict = isThroughput ? throughputDict : latencyDict;
         let arr = dict[mediaType];
@@ -252,7 +255,16 @@ function ThroughputHistory(config) {
 
         arr = arr.slice(-sampleSize); // still works if sampleSize too large
         // arr.length >= 1
+
+        return isThroughput && settings.get().streaming.abr.throughputHistory.meanThroughputCalculationMode === Constants.HARMONIC_MEAN ? _calculateHarmonicMean(arr) : _calculateArithmeticMean(arr);
+    }
+
+    function _calculateArithmeticMean(arr) {
         return arr.reduce((total, elem) => total + elem) / arr.length;
+    }
+
+    function _calculateHarmonicMean(arr) {
+        return arr.length / arr.reduce((total, elem) => total + 1 / elem, 0);
     }
 
     /**
@@ -276,7 +288,7 @@ function ThroughputHistory(config) {
     }
 
     /**
-     *
+     * Returns the average throughput in kbit/s
      * @param {MediaType} mediaType
      * @param {boolean} isDynamic
      * @return {NaN|number|*}
@@ -286,7 +298,7 @@ function ThroughputHistory(config) {
     }
 
     /**
-     *
+     * Applies the bandwidthSafetyFactor to the average throughput
      * @param {MediaType} mediaType
      * @param {boolean} isDynamic
      * @return {NaN|number|*}

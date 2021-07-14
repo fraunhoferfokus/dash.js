@@ -262,6 +262,20 @@ class Constants {
          */
         this.CMCD_MODE_HEADER = 'header';
 
+        /**
+         *  @constant {string} Makes the player use the arithmetic mean to calculate the average throughput and average latency
+         *  @memberof Constants#
+         *  @static
+         */
+        this.ARITHMETIC_MEAN = 'arithmeticMean'
+
+        /**
+         *  @constant {string} Makes the player use the harmonic mean to calculate the average throughput and average latency
+         *  @memberof Constants#
+         *  @static
+         */
+        this.HARMONIC_MEAN = 'harmonicMean'
+
 
         this.LOCATION = 'Location';
         this.INITIALIZE = 'initialize';
