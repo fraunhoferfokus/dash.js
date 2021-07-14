@@ -513,9 +513,9 @@ import {HTTPRequest} from '../streaming/vo/metrics/HTTPRequest';
  *
  * The call has no effect if an invalid method is passed.
  *
- * The sliding window moving average method computes the average throughput using the last four segments downloaded.
+ * The sliding window moving average method computes the average throughput using the settings in averageThroughputSampleAmount.
  *
- * If the stream is live (as opposed to VOD), then only the last three segments are used.
+ * Per default the last four segments (VoD) and the last three segments (Live) are used.
  *
  * If wide variations in throughput are detected, the number of segments can be dynamically increased to avoid oscillations.
  *
