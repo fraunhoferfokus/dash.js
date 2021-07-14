@@ -220,12 +220,27 @@ function ThroughputHistory(config) {
         return sampleSize;
     }
 
+    /**
+     *
+     * @param {boolean} isThroughput
+     * @param {MediaType} mediaType
+     * @param {boolean} isDynamic
+     * @return {NaN|number|*}
+     * @private
+     */
     function _getAverage(isThroughput, mediaType, isDynamic) {
         // only two moving average methods defined at the moment
         return settings.get().streaming.abr.movingAverageMethod !== Constants.MOVING_AVERAGE_SLIDING_WINDOW ?
             getAverageEwma(isThroughput, mediaType) : getAverageSlidingWindow(isThroughput, mediaType, isDynamic);
     }
 
+    /**
+     *
+     * @param {boolean} isThroughput
+     * @param {MediaType} mediaType
+     * @param {boolean} isDynamic
+     * @return {number|NaN}
+     */
     function getAverageSlidingWindow(isThroughput, mediaType, isDynamic) {
         const sampleSize = _getSampleSize(isThroughput, mediaType, isDynamic);
         const dict = isThroughput ? throughputDict : latencyDict;
@@ -240,6 +255,12 @@ function ThroughputHistory(config) {
         return arr.reduce((total, elem) => total + elem) / arr.length;
     }
 
+    /**
+     *
+     * @param {boolean} isThroughput
+     * @param {MediaType} mediaType
+     * @return {number|NaN}
+     */
     function getAverageEwma(isThroughput, mediaType) {
         const halfLife = isThroughput ? ewmaHalfLife.throughputHalfLife : ewmaHalfLife.latencyHalfLife;
         const ewmaObj = isThroughput ? ewmaThroughputDict[mediaType] : ewmaLatencyDict[mediaType];
@@ -254,10 +275,22 @@ function ThroughputHistory(config) {
         return isThroughput ? Math.min(fastEstimate, slowEstimate) : Math.max(fastEstimate, slowEstimate);
     }
 
+    /**
+     *
+     * @param {MediaType} mediaType
+     * @param {boolean} isDynamic
+     * @return {NaN|number|*}
+     */
     function getAverageThroughput(mediaType, isDynamic) {
         return _getAverage(true, mediaType, isDynamic);
     }
 
+    /**
+     *
+     * @param {MediaType} mediaType
+     * @param {boolean} isDynamic
+     * @return {NaN|number|*}
+     */
     function getSafeAverageThroughput(mediaType, isDynamic) {
         let average = getAverageThroughput(mediaType, isDynamic);
         if (!isNaN(average)) {
@@ -266,6 +299,11 @@ function ThroughputHistory(config) {
         return average;
     }
 
+    /**
+     *
+     * @param {MediaType} mediaType
+     * @return {NaN|number|*}
+     */
     function getAverageLatency(mediaType) {
         return _getAverage(false, mediaType);
     }
@@ -286,6 +324,11 @@ function ThroughputHistory(config) {
         ewmaLatencyDict[mediaType] = ewmaLatencyDict[mediaType] || { fastEstimate: 0, slowEstimate: 0, totalWeight: 0 };
     }
 
+    /**
+     *
+     * @param {MediaType} mediaType
+     * @private
+     */
     function _clearSettingsForMediaType(mediaType) {
         delete throughputDict[mediaType];
         delete latencyDict[mediaType];
@@ -293,6 +336,9 @@ function ThroughputHistory(config) {
         delete ewmaLatencyDict[mediaType];
     }
 
+    /**
+     *
+     */
     function reset() {
         throughputDict = {};
         latencyDict = {};
